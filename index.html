@@ -158,6 +158,16 @@ h2{font-family:var(--serif);font-weight:400;font-size:clamp(2.4rem,4.6vw,3.6rem)
 .waffle-key i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:8px;vertical-align:-1px}
 .k-ok{background:#2E8F88}.k-miss{background:#E0B866}
 .p-link{margin-top:26px}
+.project-2{margin-top:32px}
+.gapbars{display:grid;gap:14px}
+.bar-row{display:grid;grid-template-columns:130px 1fr 42px;align-items:center;gap:12px;font-size:.82rem;color:rgba(255,255,255,.8)}
+.bar-row b{font-weight:600;color:var(--white);text-align:right}
+.bar-track{height:14px;border-radius:7px;background:rgba(255,255,255,.07);overflow:hidden}
+.bar-track i{display:block;height:100%;width:0;border-radius:7px;background:#2E8F88;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.gapbars.on .bar-track i{width:calc(var(--w) / .6)}
+.bar-row.is-avg .bar-track i{background:#E0B866}
+.bar-row.is-low .bar-track i{background:rgba(255,255,255,.35)}
+@media (max-width:560px){.bar-row{grid-template-columns:104px 1fr 36px;gap:8px}}
 .viz-note{margin-top:18px;font-size:.78rem;color:rgba(255,255,255,.55)}
 
 /* skills */
@@ -284,7 +294,7 @@ footer{margin-top:90px;padding-top:26px;border-top:1px solid rgba(255,255,255,.1
     <ul id="menu">
       <li><a href="#about">About</a></li>
       <li><a href="#experience">Experience</a></li>
-      <li><a href="#project">Project</a></li>
+      <li><a href="#project">Projects</a></li>
       <li><a href="#skills">Skills</a></li>
       <li><a href="#education">Education</a></li>
       <li><a href="#contact">Contact</a></li>
@@ -447,7 +457,7 @@ footer{margin-top:90px;padding-top:26px;border-top:1px solid rgba(255,255,255,.1
 
 <section class="block" id="project">
   <div class="wrap">
-    <div class="sec-head rv"><span class="tag">Featured project</span><h2>Finding the revenue that never got billed.</h2></div>
+    <div class="sec-head rv"><span class="tag">Featured projects</span><h2>Finding what the data actually says.</h2></div>
     <div class="project rv">
       <div class="project-info">
         <h3>TutorHive Platform Analytics</h3>
@@ -470,6 +480,35 @@ footer{margin-top:90px;padding-top:26px;border-top:1px solid rgba(255,255,255,.1
         <p class="viz-sub">72 completed sessions in date order. Each square is one session.</p>
         <div class="heat waffle" id="heat" role="img" aria-label="58 of 72 completed sessions matched to a paid payment; the 14 most recent have no payment record"></div>
         <div class="waffle-key"><span><i class="k-ok"></i>Paid: 58 sessions, $3,900</span><span><i class="k-miss"></i>No payment record: 14 sessions</span></div>
+      </div>
+    </div>
+    <div class="project project-2 rv">
+      <div class="project-info">
+        <h3>Mental Health and Resume Gaps</h3>
+        <p class="stack">R, Logistic regression, Decision trees, ggplot2</p>
+        <ul>
+          <li>Analyzed a 334-person survey to test whether mental illness is linked to gaps in employment history.</li>
+          <li>Found that respondents with a mental illness were more than twice as likely to have a resume gap (44% vs 19%), and that panic attacks carried about 3× the odds once other factors were held constant.</li>
+          <li>Built logistic regression and decision tree models with class weights and a stratified split, judged on recall, balanced accuracy, and AUC against a naive baseline.</li>
+          <li>Caught and removed target leakage in the original model, so the results reflect real predictive power rather than an inflated score.</li>
+        </ul>
+        <div class="p-stats">
+          <div><strong>334</strong><span>survey responses</span></div>
+          <div><strong>2.4&times;</strong><span>gap rate with mental illness</span></div>
+          <div><strong>0.63</strong><span>model AUC</span></div>
+        </div>
+        <a class="btn btn-ghost p-link" href="https://github.com/rimshaahson/mental-health-resume-gaps" target="_blank" rel="noopener">View the analysis on GitHub</a>
+      </div>
+      <div class="project-viz">
+        <p class="viz-title">Share with a resume gap</p>
+        <p class="viz-sub">Among respondents who reported each factor</p>
+        <div class="gapbars" role="img" aria-label="Resume gap rate: compulsive behavior 59%, panic attacks 55%, mental illness 44%, all respondents 25%, no mental illness 19%">
+          <div class="bar-row"><span class="bar-lbl">Compulsive behavior</span><span class="bar-track"><i style="--w:59%"></i></span><b>59%</b></div>
+          <div class="bar-row"><span class="bar-lbl">Panic attacks</span><span class="bar-track"><i style="--w:55%"></i></span><b>55%</b></div>
+          <div class="bar-row"><span class="bar-lbl">Mental illness</span><span class="bar-track"><i style="--w:44%"></i></span><b>44%</b></div>
+          <div class="bar-row is-avg"><span class="bar-lbl">All respondents</span><span class="bar-track"><i style="--w:25%"></i></span><b>25%</b></div>
+          <div class="bar-row is-low"><span class="bar-lbl">No mental illness</span><span class="bar-track"><i style="--w:19%"></i></span><b>19%</b></div>
+        </div>
       </div>
     </div>
   </div>
@@ -594,6 +633,7 @@ footer{margin-top:90px;padding-top:26px;border-top:1px solid rgba(255,255,255,.1
   });
   const once = (el, fn, th=.35) => { const o = new IntersectionObserver(e => { if (e[0].isIntersecting){ fn(); o.disconnect(); } }, {threshold:th}); o.observe(el); };
   once(heat, () => heat.classList.add('on'));
+  document.querySelectorAll('.gapbars').forEach(b => once(b, () => b.classList.add('on')));
   const ring = document.getElementById('gpaRing');
   once(ring, () => ring.style.strokeDashoffset = 251.3 * (1 - 3.86/4));
 })();
