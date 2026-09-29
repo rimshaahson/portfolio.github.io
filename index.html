@@ -153,6 +153,11 @@ h2{font-family:var(--serif);font-weight:400;font-size:clamp(2.4rem,4.6vw,3.6rem)
 .heat .hd{color:rgba(255,255,255,.55);text-align:center}
 .heat .cell{aspect-ratio:1;border-radius:5px;background:rgba(255,255,255,.06);transform:scale(.4);opacity:0;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .5s}
 .heat.on .cell{transform:scale(1);opacity:1}
+.heat.waffle{grid-template-columns:repeat(12,1fr);gap:6px}
+.waffle-key{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:20px;font-size:.8rem;color:rgba(255,255,255,.75)}
+.waffle-key i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+.k-ok{background:#2E8F88}.k-miss{background:#E0B866}
+.p-link{margin-top:26px}
 .viz-note{margin-top:18px;font-size:.78rem;color:rgba(255,255,255,.55)}
 
 /* skills */
@@ -442,28 +447,29 @@ footer{margin-top:90px;padding-top:26px;border-top:1px solid rgba(255,255,255,.1
 
 <section class="block" id="project">
   <div class="wrap">
-    <div class="sec-head rv"><span class="tag">Featured project</span><h2>Finding the money a dashboard was missing.</h2></div>
+    <div class="sec-head rv"><span class="tag">Featured project</span><h2>Finding the revenue that never got billed.</h2></div>
     <div class="project rv">
       <div class="project-info">
         <h3>TutorHive Platform Analytics</h3>
-        <p class="stack">SQL, BigQuery, Airflow, Google Apps Script</p>
+        <p class="stack">SQL, BigQuery, CTEs, Window functions</p>
         <ul>
-          <li>Queried a 6-table SaaS dataset in BigQuery to answer 30+ business questions on retention, revenue, and session activity.</li>
-          <li>Built cohort retention and revenue models using CTEs, window functions, and conditional aggregation.</li>
-          <li>Scheduled hourly Airflow refreshes to a Google Sheet, making data 24x fresher than the old once-a-day update.</li>
-          <li>Turned the Sheet into an Apps Script dashboard and uncovered billing gaps: completed sessions with no payment and cancelled sessions left unrefunded.</li>
+          <li>Queried a 6-table tutoring platform dataset in BigQuery to answer 31 business questions on activation, revenue, and session performance.</li>
+          <li>Built cohort activation and running-revenue analyses with CTEs, window functions, and a generated date series so months with no revenue still show up.</li>
+          <li>Reconciled every completed session against payments and found 14 of 72 (19%) never billed, about $940 in revenue at risk.</li>
+          <li>Traced the gap to the most recent weeks of data, which points to a payment-recording issue rather than customers not paying, and cross-checked totals between queries to the dollar.</li>
         </ul>
         <div class="p-stats">
-          <div><strong>30+</strong><span>business questions</span></div>
-          <div><strong>24x</strong><span>fresher data</span></div>
-          <div><strong>6</strong><span>tables modeled</span></div>
+          <div><strong>31</strong><span>business questions</span></div>
+          <div><strong>19%</strong><span>sessions unbilled</span></div>
+          <div><strong>6</strong><span>tables analyzed</span></div>
         </div>
+        <a class="btn btn-ghost p-link" href="https://github.com/rimshaahson/tutorhive-sql-analytics" target="_blank" rel="noopener">View the SQL on GitHub</a>
       </div>
       <div class="project-viz">
-        <p class="viz-title">Cohort retention view</p>
-        <p class="viz-sub">Monthly signup cohorts by months since first session</p>
-        <div class="heat" id="heat" aria-hidden="true"></div>
-        <p class="viz-note">Illustrative visual of the cohort model's output shape.</p>
+        <p class="viz-title">Payment reconciliation</p>
+        <p class="viz-sub">72 completed sessions in date order. Each square is one session.</p>
+        <div class="heat waffle" id="heat" role="img" aria-label="58 of 72 completed sessions matched to a paid payment; the 14 most recent have no payment record"></div>
+        <div class="waffle-key"><span><i class="k-ok"></i>Paid: 58 sessions, $3,900</span><span><i class="k-miss"></i>No payment record: 14 sessions</span></div>
       </div>
     </div>
   </div>
@@ -563,23 +569,14 @@ footer{margin-top:90px;padding-top:26px;border-top:1px solid rgba(255,255,255,.1
       el.textContent = fmt(Math.round(to*e)); if (k<1) requestAnimationFrame(tick); })(t0);
   }
 
-  /* heatmap (illustrative) */
+  /* reconciliation waffle: 72 completed sessions, 58 paid then the 14 most recent unbilled */
   const heat = document.getElementById('heat');
-  const months = ['Jan','Feb','Mar','Apr','May','Jun'];
-  heat.insertAdjacentHTML('beforeend','<span></span>' + Array.from({length:8},(_,i)=>`<span class="hd">M${i}</span>`).join(''));
-  months.forEach((m,r) => {
-    heat.insertAdjacentHTML('beforeend', `<span class="lbl">${m}</span>`);
-    for (let c=0;c<8;c++){
-      const cell = document.createElement('span'); cell.className='cell';
-      if (c < 8 - r){
-        const v = c===0 ? 1 : Math.max(.12, .78 * Math.pow(.86, c-1) + (r%2 ? .03 : -.02));
-        cell.style.background = `rgba(46,143,136,${(.15 + v*.85).toFixed(2)})`;
-        if (c===0) cell.style.background = '#E0B866';
-      }
-      cell.style.transitionDelay = ((r+c)*45) + 'ms';
-      heat.appendChild(cell);
-    }
-  });
+  for (let i=0;i<72;i++){
+    const cell = document.createElement('span'); cell.className='cell';
+    cell.style.background = i < 58 ? '#2E8F88' : '#E0B866';
+    cell.style.transitionDelay = (i*14) + 'ms';
+    heat.appendChild(cell);
+  }
 
   /* reveal */
   const io = new IntersectionObserver(entries => {
